@@ -1,0 +1,55 @@
+services:
+  web:
+    build: .
+    env_file:
+      - .env
+    environment:
+      - ARQ_REDIS_HOST=redis
+      - DB_URL=postgres://blockanalitica:postgres@db:5432/sky
+    command: sanic core.app:create_app --debug --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./src/:/code/:z
+      - ./abis/:/code/abis/:z
+      - ipython_data_local:/root/.ipython/profile_default:z # persist ipython data, including ipython history
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - valkey
+
+  arq:
+    build: .
+    env_file:
+      - .env
+    environment:
+      - ARQ_REDIS_HOST=redis
+      - DB_URL=postgres://blockanalitica:postgres@db:5432/sky
+    command: arq worker.ARQWorker
+    volumes:
+      - ./src/:/code/:z
+      - ./abis/:/code/abis/:z
+      - ipython_data_local:/root/.ipython/profile_default:z # persist ipython data, including ipython history
+    depends_on:
+      - db
+      - valkey
+
+  db:
+    image: postgres:17.5
+    command: >
+      -c max_wal_size=16384
+    volumes:
+      - ./.data/db:/var/lib/postgresql/data:z
+    environment:
+      - POSTGRES_DB=sky
+      - POSTGRES_USER=blockanalitica
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5478:5432"
+
+  valkey:
+    image: valkey/valkey:9
+    ports:
+      - "6379:6379"
+
+volumes:
+  ipython_data_local: {}

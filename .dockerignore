@@ -1,0 +1,27 @@
+.data/
+.git/
+.github/
+.pre-commit-config.yaml
+static/
+.venv/
+
+*.log
+
+Makefile
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+.Python
+env/
+build/
+.local/
+*.egg
+
+# Docker
+Dockerfile
+docker-compose.yml

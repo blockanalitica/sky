@@ -1,0 +1,112 @@
+[project]
+name = "sky"
+version = "0.1.0"
+description = "Sky"
+requires-python = ">=3.13,<3.15"
+dependencies = [
+    "async-lru==2.3.0",
+    "aiofiles==25.1.0",
+    "balabs-kit[arq]>=0.1.2",
+    "chain-harvester==2.18.0",
+]
+
+[dependency-groups]
+dev = [
+    "notebook==7.5.5",
+    "pre-commit==4.5.1",
+    "pytest-asyncio==1.3.0",
+    "ruff==0.15.9",
+]
+
+[tool.tortoise]
+tortoise_orm = "core.orm.TORTOISE_ORM"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+indent-width = 4
+extend-exclude = ["*/migrations/*.py"]
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+unfixable = []
+extend-select = [
+    "YTT", # flake8-2020
+    "S", # flake8-bandit
+    "B", # flake8-bugbear
+    "A", # flake8-builtins
+    "C4", # flake8-comprehensions
+    "T10", # flake8-debugger
+    "T20", # flake8-print
+    "SIM", # flake8-simplify
+    "PIE", # flake8-pie
+    "COM", # flake8-commas
+    "PYI", # flake8-pyi
+    "PT", # flake8-pytest-style
+    "DTZ", # flake8-datetimez
+    "I", # isort
+    "C90", # mccabe
+    "E", # pycodestyle
+    "W", # pycodestyle
+    "F", # pyflakes
+    "PGH", # pygrep-hooks
+    "UP", # pyupgrade
+    "RUF", # ruff
+    "TRY", # tryceratops
+    "N", # pep8-naming
+    "PERF", # Perflint
+    "TID", # flake8-tidy-imports
+]
+ignore = [
+    "C901",
+    "COM812",
+    "E731",
+    "PERF401",
+    "PYI024",
+    "RUF012",
+    "S108",
+    "S608",
+    "SIM108",
+    "TRY002",
+    "TRY003",
+    "TRY300",
+    "S105",
+    "SIM110",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+
+[tool.ruff.lint.isort]
+known-first-party = ["core", "config"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+# Ban imports starting with "src." - these work locally but fail in production
+"src"= {msg = "Don't import from 'src.*' - use 'from core.utils import ...' instead of 'from src.core.utils import ...')" }
+"requests" = { msg = "Do not use 'requests'; use an async client (e.g. aiohttp) instead." }
+"click" = { msg = "Do not use 'click'; use an asyncclick (e.g. import asyncclick as click) instead." }
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*" = ["S101"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers =[
+    "use_db: spin up a fresh test DB and init Tortoise"
+]
+addopts = "-p no:anchorpy"
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+sources = ["src"]
+
+[tool.hatch.build.targets.wheel]
+only-include = ["src"]

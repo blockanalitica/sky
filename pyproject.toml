@@ -102,7 +102,7 @@ markers =[
 addopts = "-p no:anchorpy"
 
 [build-system]
-requires = ["hatchling>=1.27"]
+requires = ["hatchling>=1.29.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]

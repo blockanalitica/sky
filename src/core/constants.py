@@ -4,8 +4,6 @@ NULL_ADDRESS = "0x0000000000000000000000000000000000000000"
 SECONDS_PER_YEAR = 31536000
 
 MAX_UINT256 = 2**256 - 1
-# High bit set ⇒ value is a signed-negative int256 encoded as uint256.
-INT256_SIGN_BIT = 1 << 255
 
 
 RAY = Decimal("1e27")

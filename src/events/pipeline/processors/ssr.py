@@ -2,6 +2,7 @@ import logging
 
 from chain_harvester.utils import create_index
 
+from core.constants import SUSDS_ADDRESS
 from core.utils.processors import (
     NetworkProcessor,
     determine_last_processed_block,
@@ -10,8 +11,6 @@ from core.utils.processors import (
 from events.models import EventSSR
 
 log = logging.getLogger(__name__)
-
-SUSDS = "0xa3931d71877c0e7a3148cb7eb4463524fec27fbd"
 
 
 class EventSSRProcessor(NetworkProcessor):
@@ -34,7 +33,7 @@ class EventSSRProcessor(NetworkProcessor):
             "0xe986e40cc8c151830d4f61050f4fb2e4add8567caad2d5f5496f9158e91fe4c7",  # file
         ]
         events = self.chain_async.fetch_events(
-            [SUSDS],
+            [SUSDS_ADDRESS],
             self.from_block,
             topics=[topics],
             to_block=self.to_block,

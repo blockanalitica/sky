@@ -4,7 +4,8 @@ APP_NAME = "Sky"
 def configure_settings(settings, env):
     db_url = env("DB_URL")
     # increase pool size to 10 (overrides tortoise default which is 5)
-    db_url += "?max_size=10"
+    separator = "&" if "?" in db_url else "?"
+    db_url += f"{separator}max_size=10"
 
     settings["TORTOISE_ORM"] = {
         "connections": {

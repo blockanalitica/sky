@@ -284,18 +284,17 @@ class AgentUrnStatesProcessor:
                     ink = Decimal(0)
                     art = Decimal(0)
 
-                dink = normalize_to_decimal(args["dink"], 18)
+                # In case of allocators dink is set to MAX_UINT256, so we need to set it to 0
+                raw_dink = Decimal(args["dink"])
+                if raw_dink >= MAX_UINT256:
+                    raw_dink = 0
+
+                dink = normalize_to_decimal(raw_dink, 18)
                 dart = normalize_to_decimal(args["dart"], 18)
                 ink += dink
                 art += dart
 
                 rate = normalize_to_decimal(current_rate, 27)
-
-                if ink >= MAX_UINT256:
-                    ink = Decimal(0)
-
-                if dink >= MAX_UINT256:
-                    dink = Decimal(0)
 
                 events_to_create.append(
                     AgentUrnEventState(

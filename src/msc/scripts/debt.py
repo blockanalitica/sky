@@ -10,7 +10,7 @@ from msc.pipeline.processors.debt import MSCDebtSnapshotManager
 log = logging.getLogger(__name__)
 
 
-async def run(should_delete=True):
+async def run(should_delete=False):
     async with get_chain_async("ethereum") as chain:
         if should_delete:
             await MSCItemSnapshot.all().delete()
@@ -24,7 +24,7 @@ async def run(should_delete=True):
 @click.option(
     "--delete/--no-delete",
     "should_delete",
-    default=True,
+    default=False,
     help="Delete existing MSC item snapshots before syncing.",
 )
 async def cmd(should_delete):

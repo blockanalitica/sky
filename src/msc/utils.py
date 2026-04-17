@@ -36,7 +36,7 @@ async def get_ssr_events_for_date(for_date):
             FROM {EventSSR.db_table()}
             WHERE
                 datetime >= %(date_min)s::timestamptz
-                AND datetime <= %(date_max)s::timestamptz
+                AND datetime < %(date_max)s::timestamptz
             ORDER BY order_index DESC
         )
         SELECT *

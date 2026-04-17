@@ -284,17 +284,13 @@ class AgentUrnStatesProcessor:
                     ink = Decimal(0)
                     art = Decimal(0)
 
-                # Vat LogNote can deliver -1 as the max uint256 sentinel; treat
-                # it as a no-op rather than letting it poison running totals.
-                raw_dink = int(args["dink"])
-                raw_dart = int(args["dart"])
+                # In case of allocators dink is set to MAX_UINT256, so we need to set it to 0
+                raw_dink = Decimal(args["dink"])
                 if raw_dink >= MAX_UINT256:
                     raw_dink = 0
-                if raw_dart >= MAX_UINT256:
-                    raw_dart = 0
 
                 dink = normalize_to_decimal(raw_dink, 18)
-                dart = normalize_to_decimal(raw_dart, 18)
+                dart = normalize_to_decimal(args["dart"], 18)
                 ink += dink
                 art += dart
 

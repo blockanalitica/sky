@@ -6,6 +6,7 @@ from chain_harvester.utils import chunks, normalize_to_decimal
 from eth_utils import to_bytes
 
 from agents.models import Agent, AgentUrnEventState
+from core.constants import VAT_ADDRESS
 from core.sources.blockchain import get_chain_async
 
 log = logging.getLogger(__name__)
@@ -15,8 +16,11 @@ log = logging.getLogger(__name__)
 @click.option("--ilk", type=str)
 async def cmd(ilk):
     latest = await AgentUrnEventState.all().order_by("-block_number").first()
+    if latest is None:
+        click.echo("No AgentUrnEventState rows found; run `agents urns` first.")
+        return
     max_block = latest.block_number
-    print(f"MAX BLOCK: {max_block}")  # noqa:T201
+    click.echo(f"MAX BLOCK: {max_block}")
 
     agents = await Agent.all()
     sql = f"""
@@ -39,7 +43,7 @@ async def cmd(ilk):
             art = item["art"]
             calls.append(
                 (
-                    "0x35d1b3f3d7966a1dfe207aa4514c12a259a0492b",
+                    VAT_ADDRESS,
                     [
                         "urns(bytes32,address)((uint256,uint256))",
                         to_bytes(text=current_ilk),

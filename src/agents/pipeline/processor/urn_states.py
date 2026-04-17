@@ -6,7 +6,7 @@ from bakit.utils.db import fetch_all_sql, streaming_fetch_all_sql
 from chain_harvester.utils import RAY, normalize_to_decimal
 
 from agents.models import Agent, AgentIlkRateEvent, AgentUrnEventState
-from core.constants import MAX_UINT256
+from core.constants import INT256_SIGN_BIT
 from core.utils.tools import chunk_generator_by_key
 from events.models import EventVat
 
@@ -284,18 +284,22 @@ class AgentUrnStatesProcessor:
                     ink = Decimal(0)
                     art = Decimal(0)
 
-                dink = normalize_to_decimal(args["dink"], 18)
-                dart = normalize_to_decimal(args["dart"], 18)
+                # Vat LogNote may deliver deltas as raw uint256 where negative
+                # int256 values appear wrapped near 2**256. Zero them out so
+                # they don't poison running ink/art totals.
+                raw_dink = int(args["dink"])
+                raw_dart = int(args["dart"])
+                if raw_dink >= INT256_SIGN_BIT:
+                    raw_dink = 0
+                if raw_dart >= INT256_SIGN_BIT:
+                    raw_dart = 0
+
+                dink = normalize_to_decimal(raw_dink, 18)
+                dart = normalize_to_decimal(raw_dart, 18)
                 ink += dink
                 art += dart
 
                 rate = normalize_to_decimal(current_rate, 27)
-
-                if ink >= MAX_UINT256:
-                    ink = Decimal(0)
-
-                if dink >= MAX_UINT256:
-                    dink = Decimal(0)
 
                 events_to_create.append(
                     AgentUrnEventState(

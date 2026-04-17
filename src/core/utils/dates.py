@@ -1,41 +1,10 @@
 from datetime import UTC, datetime, time, timedelta
 
 
-def snapshot_dates_after_midnight(dt):
-    current_time = dt.time()
-    date = dt.date()
-    after = time(0, 15)
-    dates = [date]
-    if current_time <= after:
-        dates.append(date - timedelta(days=1))
+def _snapshot_dates_after_midnight(dt):
+    """If we're within 15 minutes after midnight UTC, also produce yesterday's date.
 
-    return dates
-
-
-def snapshot_dates_before_midnight(dt):
-    current_time = dt.time()
-    date = dt.date()
-    before = time(23, 45)
-    dates = [date]
-    if current_time >= before:
-        dates.append(date + timedelta(days=1))
-
-    return dates
-
-
-def get_additional_snapshot_dates_after_midnight(dt):
-    """Get relevant dates for snapshots after midnight.
-
-    This function determines which dates should be used for generating snapshots
-    when the current time is after midnight but before 00:15 UTC. It returns:
-    - The current date
-    - The previous date if current time is before 00:15 UTC
-
-    Args:
-        dt (datetime): The current datetime to check
-
-    Returns:
-        list: A list of dates to process for snapshots
+    Gives downstream snapshot jobs a short grace window to finalize the prior day.
     """
     current_time = dt.time()
     date = dt.date()
@@ -43,47 +12,14 @@ def get_additional_snapshot_dates_after_midnight(dt):
     dates = [date]
     if current_time <= after:
         dates.append(date - timedelta(days=1))
-
-    return dates
-
-
-def get_additional_snapshot_dates_before_midnight(dt):
-    """Get relevant dates for snapshots before midnight.
-
-    This function determines which dates should be used for generating snapshots
-    when the current time is before midnight but after 23:45 UTC. It returns:
-    - The current date
-    - The next date if current time is after 23:45 UTC
-
-    Args:
-        dt (datetime): The current datetime to check
-
-    Returns:
-        list: A list of dates to process for snapshots
-    """
-    current_time = dt.time()
-    date = dt.date()
-    before = time(23, 45)
-    dates = [date]
-    if current_time >= before:
-        dates.append(date + timedelta(days=1))
-
     return dates
 
 
 def get_all_snapshot_dates_after_midnight(current_datetime, latest_date):
-    """Get all dates that need snapshots after midnight.
+    """All dates that need a snapshot rebuild, from ``latest_date`` through today.
 
-    This function calculates all dates that need snapshotting based on:
-    1. The number of days between the latest snapshot date and current date
-    2. Additional dates around midnight for the current date
-
-    Args:
-        current_datetime (datetime): The current datetime to consider
-        latest_date (date): Date of the last snapshot
-
-    Returns:
-        list: A sorted list of dates to process for snapshots
+    On today's date, unions with the post-midnight grace dates so a run that
+    starts right after midnight still refreshes yesterday.
     """
     dates = set()
     current_date = current_datetime.date()
@@ -92,14 +28,8 @@ def get_all_snapshot_dates_after_midnight(current_datetime, latest_date):
         date = latest_date + timedelta(days=i)
         dates.add(date)
         if date == current_date:
-            dates.update(get_additional_snapshot_dates_after_midnight(current_datetime))
+            dates.update(_snapshot_dates_after_midnight(current_datetime))
     return sorted(dates)
-
-
-def ensure_utc(dt):
-    if dt.tzinfo is None:
-        return dt.replace(tzinfo=UTC)
-    return dt.astimezone(UTC)
 
 
 def get_min_max_dt(for_date):

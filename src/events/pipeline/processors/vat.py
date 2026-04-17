@@ -2,6 +2,7 @@ import logging
 
 from chain_harvester.utils import create_index
 
+from core.constants import VAT_ADDRESS
 from core.models import EventVat
 from core.utils.processors import (
     NetworkProcessor,
@@ -42,7 +43,7 @@ class EventVatProcessor(NetworkProcessor):
         ]
 
         events = self.chain_async.fetch_events(
-            ["0x35d1b3f3d7966a1dfe207aa4514c12a259a0492b"],
+            [VAT_ADDRESS],
             self.from_block,
             topics=[topics],
             to_block=self.to_block,

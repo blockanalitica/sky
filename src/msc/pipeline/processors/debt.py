@@ -6,7 +6,7 @@ from chain_harvester.utils import normalize_to_decimal
 from eth_utils.conversions import to_bytes
 
 from agents.models import Agent, AgentUrnEventState
-from core.constants import SECONDS_PER_YEAR
+from core.constants import SECONDS_PER_YEAR, VAT_ADDRESS
 from core.utils.dates import get_all_snapshot_dates_after_midnight, get_min_max_dt
 from core.utils.processors import BaseSnapshotsManager
 from msc.constants import PREMIUM_APR_PER_SECOND
@@ -92,7 +92,9 @@ class MSCDebtSnapshotManager(BaseSnapshotsManager):
             ssr_args = json.loads(ssr_event["args"])
             ssr_current = decode_duty_ray(ssr_args["data"]).quantize(Decimal("1e-30"))
         else:
-            ssr_current = Decimal(1)
+            # decode_duty_ray returns (duty/RAY) - 1 — i.e. the per-second rate
+            # above 1. Zero rate means no SSR yet, not "100% per second".
+            ssr_current = Decimal(0)
 
         day_events = []
         day_events.extend(ssr_events)
@@ -171,7 +173,7 @@ class MSCDebtSnapshotManager(BaseSnapshotsManager):
         ilk_bytes = to_bytes(text=agent.ilk).ljust(32, b"\0")
         calls = [
             (
-                "0x35d1b3f3d7966a1dfe207aa4514c12a259a0492b",
+                VAT_ADDRESS,
                 [
                     "ilks(bytes32)((uint256,uint256,uint256,uint256,uint256))",
                     ilk_bytes,
@@ -186,7 +188,7 @@ class MSCDebtSnapshotManager(BaseSnapshotsManager):
         if int(onchain_debt) != int(current_state.debt):
             log.warning(
                 "Balance missmatch for address=%s; ilk=%s! Onchain=%s vs DB=%s;",
-                "0x35d1b3f3d7966a1dfe207aa4514c12a259a0492b",
+                VAT_ADDRESS,
                 agent.ilk,
                 onchain_debt,
                 current_state.debt,

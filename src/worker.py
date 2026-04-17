@@ -12,20 +12,6 @@ from core.utils.tasks import redis_settings
 
 TASK_PACKAGES = [
     "core",
-    "aave",
-    "tokens",
-    "stars",
-    "maple",
-    "spark",
-    "morpho",
-    "compound",
-    "rrc",
-    "sky",
-    "asc",
-    "sphere",
-    "liquity",
-    "demand",
-    "merkl",
 ]
 
 CRON_JOBS, FUNCTIONS = collect_cron_jobs_and_functions(TASK_PACKAGES)
